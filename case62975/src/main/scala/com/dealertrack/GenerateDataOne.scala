@@ -16,6 +16,8 @@ import scala.util.Random
 
 object GenerateDataOne {
 
+  val outputLocation = "/tmp/spark-bug/data-one"
+
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 1").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
@@ -27,7 +29,7 @@ object GenerateDataOne {
       val job = new Job()
       val schema = DataOne.SCHEMA$
 
-      FileOutputFormat.setOutputPath(job, new Path("/tmp/spark-bug"))
+      FileOutputFormat.setOutputPath(job, new Path(outputLocation))
       AvroJob.setOutputKeySchema(job, schema)
       job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataOne]])
 
