@@ -29,28 +29,28 @@ object ErrorExample {
     job2.set("mapreduce.input.fileinputformat.input.dir.recursive", "true")
     FileInputFormat.setInputPaths(job2, source2)
 
-    val d1Rdd = sc.hadoopRDD(
+    var d1Rdd = sc.hadoopRDD(
       job1,
       classOf[org.apache.avro.mapred.AvroInputFormat[DataOne]],
       classOf[org.apache.avro.mapred.AvroWrapper[DataOne]],
       classOf[org.apache.hadoop.io.NullWritable]
     ).map(d1 => d1._1.datum().myId -> d1._1.datum())
 
-    (0 until 2000).foreach(_ => d1Rdd.union(sc.hadoopRDD(
+    (0 until 20).foreach(_ => d1Rdd = d1Rdd.union(sc.hadoopRDD(
       job1,
       classOf[org.apache.avro.mapred.AvroInputFormat[DataOne]],
       classOf[org.apache.avro.mapred.AvroWrapper[DataOne]],
       classOf[org.apache.hadoop.io.NullWritable]
     ).map(d1 => d1._1.datum().myId -> d1._1.datum())))
 
-    val d2Rdd = sc.hadoopRDD(
+    var d2Rdd = sc.hadoopRDD(
       job2,
       classOf[org.apache.avro.mapred.AvroInputFormat[DataTwo]],
       classOf[org.apache.avro.mapred.AvroWrapper[DataTwo]],
       classOf[org.apache.hadoop.io.NullWritable]
     ).map(d2 => d2._1.datum().differentId -> d2._1.datum())
 
-    (0 until 2000).foreach(_ => d2Rdd.union(sc.hadoopRDD(
+    (0 until 20).foreach(_ => d2Rdd = d2Rdd.union(sc.hadoopRDD(
       job2,
       classOf[org.apache.avro.mapred.AvroInputFormat[DataTwo]],
       classOf[org.apache.avro.mapred.AvroWrapper[DataTwo]],
