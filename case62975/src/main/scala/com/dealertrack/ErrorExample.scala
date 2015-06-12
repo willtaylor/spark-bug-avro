@@ -1,10 +1,14 @@
 package com.dealertrack
 
 import com.dealer.spark.example.{DataOne, DataTwo}
-import org.apache.hadoop.mapred.FileInputFormat
-import org.apache.hadoop.mapred.JobConf
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
+import org.apache.avro.mapred.AvroKey
+import org.apache.avro.mapreduce.AvroKeyInputFormat
+import org.apache.hadoop.io.NullWritable
+import org.apache.hadoop.mapred.{FileInputFormat, JobConf}
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.rdd.RDD
+
+import scala.reflect.ClassTag
 
 /**
  * @author ddcjoshuad
@@ -29,36 +33,50 @@ object ErrorExample {
     job2.set("mapreduce.input.fileinputformat.input.dir.recursive", "true")
     FileInputFormat.setInputPaths(job2, source2)
 
-    var d1Rdd = sc.hadoopRDD(
-      job1,
-      classOf[org.apache.avro.mapred.AvroInputFormat[DataOne]],
-      classOf[org.apache.avro.mapred.AvroWrapper[DataOne]],
-      classOf[org.apache.hadoop.io.NullWritable]
-    ).map(d1 => d1._1.datum().myId -> d1._1.datum())
 
-    (0 until 20).foreach(_ => d1Rdd = d1Rdd.union(sc.hadoopRDD(
-      job1,
-      classOf[org.apache.avro.mapred.AvroInputFormat[DataOne]],
-      classOf[org.apache.avro.mapred.AvroWrapper[DataOne]],
-      classOf[org.apache.hadoop.io.NullWritable]
-    ).map(d1 => d1._1.datum().myId -> d1._1.datum())))
-
-    var d2Rdd = sc.hadoopRDD(
-      job2,
-      classOf[org.apache.avro.mapred.AvroInputFormat[DataTwo]],
-      classOf[org.apache.avro.mapred.AvroWrapper[DataTwo]],
-      classOf[org.apache.hadoop.io.NullWritable]
-    ).map(d2 => d2._1.datum().differentId -> d2._1.datum())
-
-    (0 until 20).foreach(_ => d2Rdd = d2Rdd.union(sc.hadoopRDD(
-      job2,
-      classOf[org.apache.avro.mapred.AvroInputFormat[DataTwo]],
-      classOf[org.apache.avro.mapred.AvroWrapper[DataTwo]],
-      classOf[org.apache.hadoop.io.NullWritable]
-    ).map(d2 => d2._1.datum().differentId -> d2._1.datum())))
+    var d1Rdd: RDD[DataOne] = sc.newAPIHadoopFile(source1)(
+      ClassTag(classOf[AvroKey[DataOne]]),
+      ClassTag(classOf[NullWritable]),
+      ClassTag(classOf[AvroKeyInputFormat[DataOne]])
+    ).map {
+      ((impression: AvroKey[DataOne], _: NullWritable) => impression datum).tupled
+    }
 
 
-    d1Rdd.leftOuterJoin(d2Rdd).collect().foreach{tup  => {
+    (0 until 10).foreach(_ => d1Rdd = d1Rdd.union(sc.newAPIHadoopFile(source1)(
+      ClassTag(classOf[AvroKey[DataOne]]),
+      ClassTag(classOf[NullWritable]),
+      ClassTag(classOf[AvroKeyInputFormat[DataOne]])
+    ).map {
+      ((impression: AvroKey[DataOne], _: NullWritable) => impression datum).tupled
+    }))
+
+
+    var d2Rdd: RDD[DataTwo] = sc.newAPIHadoopFile(source2)(
+      ClassTag(classOf[AvroKey[DataTwo]]),
+      ClassTag(classOf[NullWritable]),
+      ClassTag(classOf[AvroKeyInputFormat[DataTwo]])
+    ).map {
+      ((impression: AvroKey[DataTwo], _: NullWritable) => impression datum).tupled
+    }
+
+
+    (0 until 2).foreach(_ => d2Rdd = d2Rdd.union(sc.newAPIHadoopFile(source2)(
+      ClassTag(classOf[AvroKey[DataTwo]]),
+      ClassTag(classOf[NullWritable]),
+      ClassTag(classOf[AvroKeyInputFormat[DataTwo]])
+    ).map {
+      ((impression: AvroKey[DataTwo], _: NullWritable) => impression datum).tupled
+    }))
+
+
+
+    d1Rdd.map(d1 => d1.getMyId -> d1).leftOuterJoin(d2Rdd.map(d2 => d2.getDifferentId -> d2)).filter{ tup =>
+      tup._2._2 match {
+        case Some(d2) => true
+        case _ =>  false
+      }
+    }.collect().foreach{tup  => {
         tup._2._2 match {
           case Some(d2) => if(!d2.getDifferentId.equals(tup._2._1.getMyId)){
             println(s"Key: ${tup._1} | d1key: ${tup._2._1.getMyId} | d2key: ${d2.getDifferentId}")
