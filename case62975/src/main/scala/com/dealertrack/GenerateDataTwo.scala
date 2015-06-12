@@ -1,5 +1,7 @@
 package com.dealertrack
 
+import java.util.UUID
+
 import com.dealer.spark.example.{DataOne, DataTwo}
 import org.apache.avro.mapred.AvroKey
 import org.apache.avro.mapreduce.{AvroKeyInputFormat, AvroJob, AvroKeyOutputFormat}
@@ -16,6 +18,8 @@ object GenerateDataTwo {
 
   val outputLocation = "/tmp/spark-bug/data-two"
 
+  private val matchThreshold = 10
+
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 2").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
@@ -26,12 +30,13 @@ object GenerateDataTwo {
         ((data: AvroKey[DataOne], _: NullWritable) => data datum).tupled
       }
 
-      val data2 = rdd.filter { item =>
+      val data2 = rdd map { dataOne =>
         val random = new Random()
-        random.nextInt(100) <= 10
-      } map { dataOne =>
-        val random = new Random()
-        DataTwo.newBuilder().setDifferentId(dataOne.getMyId).setSomeOtherData(random.nextString(1000))
+        if (random.nextInt(100) <= matchThreshold) {
+          DataTwo.newBuilder().setDifferentId(dataOne.getMyId).setSomeOtherData(random.nextString(1000))
+        } else {
+          DataTwo.newBuilder().setDifferentId(UUID.randomUUID().toString).setSomeOtherData(random.nextString(1000))
+        }
       }
 
       val job = new Job()

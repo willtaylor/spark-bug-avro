@@ -22,13 +22,16 @@ object GenerateDataOne {
   val outputFiles = Seq(outputBase + "-1", outputBase + "-2", outputBase + "-3", outputBase + "-4")
   val outputLocation = outputFiles.head
 
+  private val recordCount = 50000
+  private val dataSize = 2500
+
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 1").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
     try {
-      val numbers = Seq.fill(50000) { foo: Int => foo }
+      val numbers = Seq.fill(recordCount) { foo: Int => foo }
 
       val job = new Job()
       val schema = DataOne.SCHEMA$
@@ -39,7 +42,7 @@ object GenerateDataOne {
 
       sc.parallelize(numbers).map { foo =>
         val random = new Random()
-        DataOne.newBuilder().setMyId(UUID.randomUUID().toString).setSomeData(random.nextString(1000)).build
+        DataOne.newBuilder().setMyId(UUID.randomUUID().toString).setSomeData(random.nextString(dataSize)).build
       }.map(new AvroKey(_) -> NullWritable.get).saveAsNewAPIHadoopDataset(job.getConfiguration)
     } finally {
       sc.stop()
