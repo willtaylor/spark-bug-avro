@@ -21,9 +21,9 @@ libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.5"
 libraryDependencies += "org.xerial.snappy" % "snappy-java" % "1.1.2-RC1"
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit")),
-  "org.apache.spark" %% "spark-streaming" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit")),
-  "org.apache.spark" %% "spark-streaming-kafka" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit"))
+  "org.apache.spark" %% "spark-core" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit"), ExclusionRule(organization = "org.apache.avro", name = "avro-mapred")),
+  "org.apache.spark" %% "spark-streaming" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit"), ExclusionRule(organization = "org.apache.avro", name = "avro-mapred")),
+  "org.apache.spark" %% "spark-streaming-kafka" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit"), ExclusionRule(organization = "org.apache.avro", name = "avro-mapred"))
 )
 
 libraryDependencies += "com.dealer" % "spark-bug-avro-model" % "0.0.1-SNAPSHOT"
@@ -37,7 +37,8 @@ libraryDependencies += "javax.servlet" % "javax.servlet-api" % "3.0.1"
 
 libraryDependencies ++= Seq(
     "org.apache.hadoop" % "hadoop-common" % "2.6.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit")),
-    "org.apache.avro" % "avro-mapred" % "1.7.6-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit")),
+    "org.apache.hadoop" % "hadoop-client" % "2.6.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit")),
+    "org.apache.avro" % "avro-mapred" % "1.7.6-cdh5.4.1" classifier "hadoop2" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit")),
     "org.apache.avro" % "avro" % "1.7.6-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"), ExclusionRule(organization = "org.eclipse.jetty.orbit"))
 )
 
