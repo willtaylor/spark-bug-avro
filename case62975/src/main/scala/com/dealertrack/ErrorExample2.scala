@@ -1,9 +1,12 @@
 package com.dealertrack
 
-import com.dealer.spark.example.{DataOne, DataTwo}
+import com.dealer.spark.example.{DataOne, DataTwo, DataJoin}
 import org.apache.avro.mapred.AvroKey
-import org.apache.avro.mapreduce.AvroKeyInputFormat
+import org.apache.avro.mapreduce.{AvroKeyOutputFormat, AvroJob, AvroKeyInputFormat}
+import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
+import org.apache.hadoop.mapreduce.Job
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -11,9 +14,12 @@ import org.apache.spark.rdd.RDD
 import scala.reflect.ClassTag
 
 object ErrorExample2 {
+
+  val outputLocation = "/tmp/spark-bug/data-join"
+
   def main(args: Array[String]): Unit ={
 
-    val conf = new SparkConf().setMaster("local[3]").setAppName("ImpressionAggregator").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
+    val conf = new SparkConf().setMaster("local[3]").setAppName("Reproduce Bug").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
     val rddOne: RDD[(String, DataOne)] = sc.union(GenerateDataOne.outputFiles.map { fileName =>
@@ -30,15 +36,31 @@ object ErrorExample2 {
       obj.getDifferentId -> obj
     }
 
-    rddOne.leftOuterJoin(rddTwo).foreach{tup: (String, (DataOne, Option[DataTwo]))  => {
+    val job = new Job()
+    val schema = DataJoin.SCHEMA$
+
+    FileOutputFormat.setOutputPath(job, new Path(outputLocation))
+    AvroJob.setOutputKeySchema(job, schema)
+    job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataJoin]])
+
+    rddOne.leftOuterJoin(rddTwo).map{tup: (String, (DataOne, Option[DataTwo]))  => {
       val (key, (d1, d2opt)) = tup
         d2opt match {
-          case Some(d2) if ( !d2.getDifferentId.equals(d1.getMyId) || !key.equals(d2.getDifferentId) || !key.equals(d1.getMyId) ) =>
-            println(s"Key: ${tup._1} | d1key: ${tup._2._1.getMyId} | d2key: ${d2.getDifferentId}")
-          case _ => // ignore good matches
+          case Some(d2) => DataJoin.newBuilder().setKey(key)
+                                                .setDataOneKey(d1.getMyId)
+                                                .setDataOne(d1.getSomeData)
+                                                .setDataTwoKey(d2.getDifferentId)
+                                                .setDataTwo(d2.getSomeOtherData)
+                                                .build()
+          case None => DataJoin.newBuilder().setKey(key)
+                                            .setDataOneKey(d1.getMyId)
+                                            .setDataOne(d1.getSomeData)
+                                            .build()
         }
       }
-    }
+    }.map {
+      new AvroKey(_) -> NullWritable.get
+    }.saveAsNewAPIHadoopDataset(job.getConfiguration)
 
   }
 
