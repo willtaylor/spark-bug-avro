@@ -1,6 +1,6 @@
 package com.dealertrack
 
-import com.dealer.analytics.ad.intake.RTBImpression
+import com.dealer.spark.example.{DataOne, DataTwo}
 import org.apache.hadoop.mapred.FileInputFormat
 import org.apache.hadoop.mapred.JobConf
 import org.apache.spark.SparkConf
@@ -22,21 +22,27 @@ object ErrorExample {
     val job = new JobConf()
     job.set("mapreduce.input.fileinputformat.input.dir.recursive", "true")
     FileInputFormat.setInputPaths(job, source)
-    val hRdd = sc.hadoopRDD(
+    val d1Rdd = sc.hadoopRDD(
       job,
-      classOf[org.apache.avro.mapred.AvroInputFormat[RTBImpression]],
-      classOf[org.apache.avro.mapred.AvroWrapper[RTBImpression]],
+      classOf[org.apache.avro.mapred.AvroInputFormat[DataOne]],
+      classOf[org.apache.avro.mapred.AvroWrapper[DataOne]],
       classOf[org.apache.hadoop.io.NullWritable]
-    )
+    ).map(d1 => d1._1.datum().myId -> d1._1.datum())
 
-    val totalPrice = hRdd.map(avroMsg => avroMsg._1.datum())
-      .map(impression => impression.getDecryptedPrice)
-      .filter(x => x != null)
-      .reduce((priceX,priceY) => priceX + priceY)
+    val d2Rdd = sc.hadoopRDD(
+      job,
+      classOf[org.apache.avro.mapred.AvroInputFormat[DataTwo]],
+      classOf[org.apache.avro.mapred.AvroWrapper[DataTwo]],
+      classOf[org.apache.hadoop.io.NullWritable]
+    ).map(d2 => d2._1.datum().differentId -> d2._1.datum())
 
-    println(totalPrice)
 
-
+    d1Rdd.leftOuterJoin(d2Rdd).foreach{tup  => {
+        tup._2._2 match {
+          case Some(d2) => print(s"Key: ${tup._1} | d1key: ${tup._2._1.getMyId} | d2key: ${d2.getDifferentId}")
+        }
+      }
+    }
 
   }
 
