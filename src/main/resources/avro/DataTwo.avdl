@@ -1,0 +1,8 @@
+@namespace("com.dealer.spark.example")
+protocol DataTwoProcessing {
+    record DataTwo {
+        string differentId;
+        string someOtherData;
+    }
+}
+

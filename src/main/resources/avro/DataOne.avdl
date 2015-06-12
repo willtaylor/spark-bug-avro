@@ -1,0 +1,8 @@
+@namespace("com.dealer.spark.example")
+protocol DataOneProcessing {
+    record DataOne {
+        string myId;
+        string someData;
+    }
+}
+
