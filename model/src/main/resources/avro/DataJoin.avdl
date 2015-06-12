@@ -1,0 +1,9 @@
+@namespace("com.dealer.spark.example")
+protocol DataJoinProcessing {
+    record DataJoin {
+        string id;
+        string dataOne;
+        union{null, string} dataTwo = null;
+    }
+}
+
