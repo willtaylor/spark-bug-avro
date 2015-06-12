@@ -15,19 +15,19 @@ import scala.reflect.ClassTag
 
 object ErrorExample2 {
 
-  val outputLocation = "/tmp/spark-bug/data-join"
+  def outputLocation(prefix: String) = prefix + "/data-join"
 
   def main(args: Array[String]) {
-    execute
+    execute(Test.defaultPrefix)
   }
 
-  def execute() = {
+  def execute(prefix: String) = {
 
     val conf = new SparkConf().setMaster("local[3]").setAppName("Reproduce Bug").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
     try {
-      val rddOne: RDD[(String, DataOne)] = sc.union(GenerateDataOne.outputFiles.map { fileName =>
+      val rddOne: RDD[(String, DataOne)] = sc.union(GenerateDataOne.outputFiles(prefix).map { fileName =>
         sc.newAPIHadoopFile(fileName)(ClassTag(classOf[AvroKey[DataOne]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataOne]])) map { data: (AvroKey[DataOne], NullWritable) =>
           val (key: AvroKey[DataOne], _) = data
           val obj = key.datum
@@ -35,7 +35,7 @@ object ErrorExample2 {
         }
       })
 
-      val rddTwo: RDD[(String, DataTwo)] = sc.newAPIHadoopFile(GenerateDataTwo.outputLocation)(ClassTag(classOf[AvroKey[DataTwo]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataTwo]])) map { data: (AvroKey[DataTwo], NullWritable) =>
+      val rddTwo: RDD[(String, DataTwo)] = sc.newAPIHadoopFile(GenerateDataTwo.outputLocation(prefix))(ClassTag(classOf[AvroKey[DataTwo]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataTwo]])) map { data: (AvroKey[DataTwo], NullWritable) =>
         val (key: AvroKey[DataTwo], _) = data
         val obj = key.datum
         obj.getDifferentId -> obj
@@ -44,7 +44,7 @@ object ErrorExample2 {
       val job = new Job()
       val schema = DataJoin.SCHEMA$
 
-      FileOutputFormat.setOutputPath(job, new Path(outputLocation))
+      FileOutputFormat.setOutputPath(job, new Path(outputLocation(prefix)))
       AvroJob.setOutputKeySchema(job, schema)
       job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataJoin]])
 

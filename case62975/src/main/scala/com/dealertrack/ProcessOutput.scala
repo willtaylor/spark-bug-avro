@@ -15,16 +15,16 @@ import scala.reflect.ClassTag
 object ProcessOutput {
 
   def main(args: Array[String]) {
-    execute
+    execute(Test.defaultPrefix)
   }
 
-  def execute() = {
+  def execute(prefix: String) = {
 
     val conf = new SparkConf().setMaster("local[3]").setAppName("Process Output").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
     try {
-      val rdd: RDD[DataJoin] = sc.newAPIHadoopFile(ErrorExample2.outputLocation)(ClassTag(classOf[AvroKey[DataJoin]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataJoin]])) map { data: (AvroKey[DataJoin], NullWritable) =>
+      val rdd: RDD[DataJoin] = sc.newAPIHadoopFile(ErrorExample2.outputLocation(prefix))(ClassTag(classOf[AvroKey[DataJoin]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataJoin]])) map { data: (AvroKey[DataJoin], NullWritable) =>
         val (key: AvroKey[DataJoin], _) = data
         key.datum
       }

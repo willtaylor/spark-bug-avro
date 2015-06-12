@@ -16,22 +16,22 @@ import scala.util.Random
 
 object GenerateDataTwo {
 
-  val outputLocation = "/tmp/spark-bug/data-two"
+  def outputLocation(prefix: String) = prefix + "/data-two"
 
   private val matchThreshold = 10
   private val dataSize = 2500
 
   def main(args: Array[String]) {
-    execute
+    execute(Test.defaultPrefix)
   }
 
-  def execute() = {
+  def execute(prefix: String) = {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 2").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
     try {
-      val rdd = sc.newAPIHadoopFile(GenerateDataOne.outputLocation)(ClassTag(classOf[AvroKey[DataOne]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataOne]])) map {
+      val rdd = sc.newAPIHadoopFile(GenerateDataOne.outputLocation(prefix))(ClassTag(classOf[AvroKey[DataOne]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataOne]])) map {
         ((data: AvroKey[DataOne], _: NullWritable) => data datum).tupled
       }
 
@@ -47,7 +47,7 @@ object GenerateDataTwo {
       val job = new Job()
       val schema = DataTwo.SCHEMA$
 
-      FileOutputFormat.setOutputPath(job, new Path(outputLocation))
+      FileOutputFormat.setOutputPath(job, new Path(outputLocation(prefix)))
       AvroJob.setOutputKeySchema(job, schema)
       job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataTwo]])
 

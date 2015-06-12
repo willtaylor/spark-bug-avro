@@ -17,19 +17,19 @@ import scala.util.Random
 
 object GenerateDataOne {
 
-  private val outputBase = "/tmp/spark-bug/data-one"
+  private val outputBase = "/data-one"
 
-  val outputFiles = Seq(outputBase + "-1", outputBase + "-2", outputBase + "-3", outputBase + "-4")
-  val outputLocation = outputFiles.head
+  def outputFiles(prefix: String) = Seq(prefix + outputBase + "-1", prefix + outputBase + "-2", prefix + outputBase + "-3", prefix + outputBase + "-4")
+  def outputLocation(prefix: String) = outputFiles(prefix).head
 
   private val recordCount = 50000
   private val dataSize = 2500
 
   def main(args: Array[String]) {
-    execute
+    execute(Test.defaultPrefix)
   }
 
-  def execute() = {
+  def execute(prefix: String) = {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 1").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
@@ -40,7 +40,7 @@ object GenerateDataOne {
       val job = new Job()
       val schema = DataOne.SCHEMA$
 
-      FileOutputFormat.setOutputPath(job, new Path(outputLocation))
+      FileOutputFormat.setOutputPath(job, new Path(outputLocation(prefix)))
       AvroJob.setOutputKeySchema(job, schema)
       job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataOne]])
 
@@ -52,8 +52,8 @@ object GenerateDataOne {
       sc.stop()
     }
 
-    outputFiles.tail.foreach { i =>
-      FileUtils.copyDirectory(new java.io.File(outputLocation), new java.io.File(i))
+    outputFiles(prefix).tail.foreach { i =>
+      FileUtils.copyDirectory(new java.io.File(outputLocation(prefix)), new java.io.File(i))
     }
 
   }

@@ -4,13 +4,18 @@ import org.apache.commons.io.FileUtils
 
 object Test {
 
-  def main(args: Array[String]): Unit = {
-    FileUtils.deleteDirectory(new java.io.File("/tmp/spark-bug"))
+  val defaultPrefix = "/tmp/spark-bug"
 
-    GenerateDataOne.execute()
-    GenerateDataTwo.execute()
-    ErrorExample2.execute()
-    ProcessOutput.execute()
+  def main(args: Array[String]): Unit = {
+    val locationPrefix = args.toSeq match {
+      case Nil => FileUtils.deleteDirectory(new java.io.File(defaultPrefix)); defaultPrefix
+      case prefix :: Nil => prefix
+    }
+
+    GenerateDataOne.execute(locationPrefix)
+    GenerateDataTwo.execute(locationPrefix)
+    ErrorExample2.execute(locationPrefix)
+    ProcessOutput.execute(locationPrefix)
   }
 
 }
