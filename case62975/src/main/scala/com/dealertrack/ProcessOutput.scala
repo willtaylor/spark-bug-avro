@@ -14,7 +14,11 @@ import scala.reflect.ClassTag
 
 object ProcessOutput {
 
-  def main(args: Array[String]): Unit ={
+  def main(args: Array[String]) {
+    execute
+  }
+
+  def execute() = {
 
     val conf = new SparkConf().setMaster("local[3]").setAppName("Process Output").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)

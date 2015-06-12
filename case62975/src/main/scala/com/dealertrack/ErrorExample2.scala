@@ -17,7 +17,11 @@ object ErrorExample2 {
 
   val outputLocation = "/tmp/spark-bug/data-join"
 
-  def main(args: Array[String]): Unit ={
+  def main(args: Array[String]) {
+    execute
+  }
+
+  def execute() = {
 
     val conf = new SparkConf().setMaster("local[3]").setAppName("Reproduce Bug").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)

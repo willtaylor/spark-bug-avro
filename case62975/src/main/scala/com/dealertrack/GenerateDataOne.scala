@@ -26,6 +26,10 @@ object GenerateDataOne {
   private val dataSize = 2500
 
   def main(args: Array[String]) {
+    execute
+  }
+
+  def execute() = {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 1").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
