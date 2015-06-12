@@ -14,6 +14,10 @@ resolvers ++= Seq(
 // This is here to include provided scope dependencies when running the app.  See: https://github.com/sbt/sbt-assembly#-provided-configuration
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))
 
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5"
+
+libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.5"
+
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "1.3.0-cdh5.4.1"
 )
@@ -21,15 +25,18 @@ libraryDependencies ++= Seq(
 libraryDependencies += "com.dealer" % "spark-bug-avro-model" % "0.0.1-SNAPSHOT"
 
 // trying to eliminate java security warning
-libraryDependencies += "org.mortbay.jetty" % "servlet-api" % "3.0.20100224" % "provided"
+//libraryDependencies += "org.mortbay.jetty" % "servlet-api" % "3.0.20100224" % "provided"
 
 libraryDependencies ++= Seq(
+    "org.apache.hadoop" % "hadoop-common" % "2.5.0-cdh5.3.0" excludeAll(ExclusionRule(organization = "org.eclipse.jetty")),
     "org.apache.avro" % "avro-mapred" % "1.7.6-cdh5.3.0" % "provided",
     "org.apache.avro" % "avro" % "1.7.6-cdh5.3.0" % "provided"
 )
 
+/*
 libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging-api" % "2.1.2",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
 )
+*/
 
