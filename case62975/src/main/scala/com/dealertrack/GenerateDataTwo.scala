@@ -18,6 +18,8 @@ object GenerateDataTwo {
 
   val outputLocation = "/tmp/spark-bug/data-two"
 
+  private val matchThreshold = 10
+
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 2").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
@@ -30,7 +32,7 @@ object GenerateDataTwo {
 
       val data2 = rdd map { dataOne =>
         val random = new Random()
-        if (random.nextInt(100) <= 10) {
+        if (random.nextInt(100) <= matchThreshold) {
           DataTwo.newBuilder().setDifferentId(dataOne.getMyId).setSomeOtherData(random.nextString(1000))
         } else {
           DataTwo.newBuilder().setDifferentId(UUID.randomUUID().toString).setSomeOtherData(random.nextString(1000))
