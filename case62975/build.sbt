@@ -18,6 +18,8 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5"
 
 libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.5"
 
+libraryDependencies += "org.xerial.snappy" % "snappy-java" % "1.1.2-RC1"
+
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "1.3.0-cdh5.4.1"
 )
