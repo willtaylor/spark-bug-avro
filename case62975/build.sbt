@@ -9,9 +9,7 @@ scalaVersion := "2.10.4"
 resolvers ++= Seq(
   "Local Maven" at Path.userHome.asFile.toURI.toURL + ".m2/repository",
   "Typesafe" at "http://repo.typesafe.com/typesafe/releases/",
-  "Java.net Maven2 Repository" at "http://download.java.net/maven/2/",
-  "ddc-artifactory" at "http://artifactory.dealer.ddc/artifactory/all-repos",
-  "snapshots" at "http://artifactory.dealer.ddc/artifactory/all-repos"
+  "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
 )
 
 libraryDependencies ++= Seq(
