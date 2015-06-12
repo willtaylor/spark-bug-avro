@@ -21,18 +21,20 @@ libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.5"
 libraryDependencies += "org.xerial.snappy" % "snappy-java" % "1.1.2-RC1"
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.3.0-cdh5.4.1"
+  "org.apache.spark" %% "spark-core" % "1.3.0-cdh5.4.1",
+  "org.apache.spark" %% "spark-streaming" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty")),
+  "org.apache.spark" %% "spark-streaming-kafka" % "1.3.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty"))
 )
 
 libraryDependencies += "com.dealer" % "spark-bug-avro-model" % "0.0.1-SNAPSHOT"
 
 // trying to eliminate java security warning
-//libraryDependencies += "org.mortbay.jetty" % "servlet-api" % "3.0.20100224"
+libraryDependencies += "org.mortbay.jetty" % "servlet-api" % "3.0.20100224"
 
 libraryDependencies ++= Seq(
-    "org.apache.hadoop" % "hadoop-common" % "2.6.0-cdh5.4.0" excludeAll(ExclusionRule(organization = "org.eclipse.jetty")),
-    "org.apache.avro" % "avro-mapred" % "1.7.6-cdh5.4.0",
-    "org.apache.avro" % "avro" % "1.7.6-cdh5.4.0"
+    "org.apache.hadoop" % "hadoop-common" % "2.6.0-cdh5.4.1" excludeAll(ExclusionRule(organization = "org.eclipse.jetty")),
+    "org.apache.avro" % "avro-mapred" % "1.7.6-cdh5.4.1",
+    "org.apache.avro" % "avro" % "1.7.6-cdh5.4.1"
 )
 
 /*
