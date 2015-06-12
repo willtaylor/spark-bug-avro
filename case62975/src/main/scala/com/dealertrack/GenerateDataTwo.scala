@@ -19,7 +19,7 @@ object GenerateDataTwo {
   val outputLocation = "/tmp/spark-bug/data-two"
 
   private val matchThreshold = 10
-  private val dataSize = 250
+  private val dataSize = 2500
 
   def main(args: Array[String]) {
 

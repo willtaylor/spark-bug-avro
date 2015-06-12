@@ -23,7 +23,7 @@ object GenerateDataOne {
   val outputLocation = outputFiles.head
 
   private val recordCount = 50000
-  private val dataSize = 250
+  private val dataSize = 2500
 
   def main(args: Array[String]) {
 
