@@ -43,7 +43,7 @@ object ErrorExample {
     }
 
 
-    (0 until 10).foreach(_ => d1Rdd = d1Rdd.union(sc.newAPIHadoopFile(source1)(
+    (0 until 20).foreach(_ => d1Rdd = d1Rdd.union(sc.newAPIHadoopFile(source1)(
       ClassTag(classOf[AvroKey[DataOne]]),
       ClassTag(classOf[NullWritable]),
       ClassTag(classOf[AvroKeyInputFormat[DataOne]])
@@ -61,7 +61,7 @@ object ErrorExample {
     }
 
 
-    (0 until 2).foreach(_ => d2Rdd = d2Rdd.union(sc.newAPIHadoopFile(source2)(
+    (0 until 20).foreach(_ => d2Rdd = d2Rdd.union(sc.newAPIHadoopFile(source2)(
       ClassTag(classOf[AvroKey[DataTwo]]),
       ClassTag(classOf[NullWritable]),
       ClassTag(classOf[AvroKeyInputFormat[DataTwo]])
