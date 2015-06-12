@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dealer</groupId>
-    <artifactId>spark-bug-avro</artifactId>
+    <artifactId>spark-bug-avro-model</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
