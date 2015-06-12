@@ -4,13 +4,12 @@ import java.util.UUID
 
 import com.dealer.spark.example.{DataOne, DataTwo}
 import org.apache.avro.mapred.AvroKey
-import org.apache.avro.mapreduce.{AvroKeyOutputFormat, AvroJob}
+import org.apache.avro.mapreduce.{AvroJob, AvroKeyOutputFormat}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapreduce.Job
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
-import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.SparkContext._
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.util.Random
 
@@ -35,7 +34,7 @@ object GenerateDataOne {
 
       sc.parallelize(numbers).map { foo =>
         val random = new Random()
-        DataOne.newBuilder().setMyId(UUID.randomUUID().toString).setSomeData(random.nextString(10000)).build
+        DataOne.newBuilder().setMyId(UUID.randomUUID().toString).setSomeData(random.nextString(1000)).build
       }.map(new AvroKey(_) -> NullWritable.get).saveAsNewAPIHadoopDataset(job.getConfiguration)
     } finally {
       sc.stop()
