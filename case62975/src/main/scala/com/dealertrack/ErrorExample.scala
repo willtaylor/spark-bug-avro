@@ -11,7 +11,7 @@ import org.apache.spark.SparkContext
  */
 object ErrorExample {
   def main(args: Array[String]): Unit ={
-    val conf = new SparkConf().setMaster("local").setAppName("ImpressionAggregator")
+    val conf = new SparkConf().setMaster("local[2]").setAppName("ImpressionAggregator")
     val sc = new SparkContext(conf)
     //    val source = getClass.getResource("/2015-03-24-18--vtdevana-cloudera14.dealer.ddc-RTBParsedImpression.1427222183676.avro").getPath
 
