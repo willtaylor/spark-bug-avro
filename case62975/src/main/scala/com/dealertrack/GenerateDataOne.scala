@@ -5,6 +5,7 @@ import java.util.UUID
 import com.dealer.spark.example.{DataOne, DataTwo}
 import org.apache.avro.mapred.AvroKey
 import org.apache.avro.mapreduce.{AvroKeyOutputFormat, AvroJob}
+import org.apache.commons.io.FileUtils
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapreduce.Job
@@ -16,7 +17,10 @@ import scala.util.Random
 
 object GenerateDataOne {
 
-  val outputLocation = "/tmp/spark-bug/data-one"
+  private val outputBase = "/tmp/spark-bug/data-one"
+
+  val outputFiles = Seq(outputBase + "-1", outputBase + "-2", outputBase + "-3", outputBase + "-4")
+  val outputLocation = outputFiles.head
 
   def main(args: Array[String]) {
 
@@ -39,6 +43,10 @@ object GenerateDataOne {
       }.map(new AvroKey(_) -> NullWritable.get).saveAsNewAPIHadoopDataset(job.getConfiguration)
     } finally {
       sc.stop()
+    }
+
+    outputFiles.tail.foreach { i =>
+      FileUtils.copyDirectory(new java.io.File(outputLocation), new java.io.File(i))
     }
 
   }
