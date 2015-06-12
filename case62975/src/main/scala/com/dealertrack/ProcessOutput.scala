@@ -19,23 +19,27 @@ object ProcessOutput {
     val conf = new SparkConf().setMaster("local[3]").setAppName("Process Output").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
-    val rdd: RDD[DataJoin] = sc.newAPIHadoopFile(ErrorExample2.outputLocation)(ClassTag(classOf[AvroKey[DataJoin]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataJoin]])) map { data: (AvroKey[DataJoin], NullWritable) =>
-      val (key: AvroKey[DataJoin], _) = data
-      key.datum
-    }
-
-    rdd foreach { entry =>
-      val key = entry.getKey
-      val data2Key = entry.getDataTwoKey
-      val bad = !key.equals(entry.getDataOneKey) || (data2Key != null && !key.equals(data2Key))
-
-      if ( bad ) {
-        println(s"***********************************")
-        println(s"***********************************")
-        println(s"Bad Record: key:${key}, data1Key:${entry.getDataOneKey}, data2Key:${data2Key}")
-        println(s"***********************************")
-        println(s"***********************************")
+    try {
+      val rdd: RDD[DataJoin] = sc.newAPIHadoopFile(ErrorExample2.outputLocation)(ClassTag(classOf[AvroKey[DataJoin]]), ClassTag(classOf[NullWritable]), ClassTag(classOf[AvroKeyInputFormat[DataJoin]])) map { data: (AvroKey[DataJoin], NullWritable) =>
+        val (key: AvroKey[DataJoin], _) = data
+        key.datum
       }
+
+      rdd foreach { entry =>
+        val key = entry.getKey
+        val data2Key = entry.getDataTwoKey
+        val bad = !key.equals(entry.getDataOneKey) || (data2Key != null && !key.equals(data2Key))
+
+        if (bad) {
+          println(s"***********************************")
+          println(s"***********************************")
+          println(s"Bad Record: key:${key}, data1Key:${entry.getDataOneKey}, data2Key:${data2Key}")
+          println(s"***********************************")
+          println(s"***********************************")
+        }
+      }
+    } finally {
+      sc.stop()
     }
 
   }

@@ -19,6 +19,7 @@ object GenerateDataTwo {
   val outputLocation = "/tmp/spark-bug/data-two"
 
   private val matchThreshold = 10
+  private val dataSize = 250
 
   def main(args: Array[String]) {
 
@@ -33,9 +34,9 @@ object GenerateDataTwo {
       val data2 = rdd map { dataOne =>
         val random = new Random()
         if (random.nextInt(100) <= matchThreshold) {
-          DataTwo.newBuilder().setDifferentId(dataOne.getMyId).setSomeOtherData(random.nextString(1000))
+          DataTwo.newBuilder().setDifferentId(dataOne.getMyId).setSomeOtherData(random.nextString(dataSize))
         } else {
-          DataTwo.newBuilder().setDifferentId(UUID.randomUUID().toString).setSomeOtherData(random.nextString(1000))
+          DataTwo.newBuilder().setDifferentId(UUID.randomUUID().toString).setSomeOtherData(random.nextString(dataSize))
         }
       }
 
