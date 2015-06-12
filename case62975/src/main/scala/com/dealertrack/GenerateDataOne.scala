@@ -12,20 +12,16 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
 
-import scala.reflect.ClassTag
 import scala.util.Random
 
-object GenerateData {
+object GenerateDataOne {
 
   def main(args: Array[String]) {
 
-    val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
+    val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator 1").registerKryoClasses(Array(classOf[DataOne], classOf[DataTwo]))
     val sc = new SparkContext(conf)
 
     try {
-      val randomCharStream = new Random().alphanumeric.grouped(25)
-      def nextId: String = randomCharStream.next().mkString
-
       val numbers = Seq.fill(50000) { foo: Int => foo }
 
       val job = new Job()
