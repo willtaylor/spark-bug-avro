@@ -22,21 +22,25 @@ object GenerateData {
     val conf = new SparkConf().setMaster("local[2]").setAppName("Sample Data Generator")
     val sc = new SparkContext(conf)
 
-    val randomCharStream = new Random().alphanumeric.grouped(25)
-    def nextId: String = randomCharStream.next().mkString
+    try {
+      val randomCharStream = new Random().alphanumeric.grouped(25)
+      def nextId: String = randomCharStream.next().mkString
 
-    val lotsOfData = Seq.fill(50000) {
-      DataOne.newBuilder().setMyId(UUID.randomUUID().toString).setSomeData(random.nextString(10000)).build
+      val lotsOfData = Seq.fill(50000) {
+        DataOne.newBuilder().setMyId(UUID.randomUUID().toString).setSomeData(random.nextString(10000)).build
+      }
+
+      val job = new Job()
+      val schema = DataOne.SCHEMA$
+
+      FileOutputFormat.setOutputPath(job, new Path("/tmp/spark-bug"))
+      AvroJob.setOutputKeySchema(job, schema)
+      job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataOne]])
+
+      sc.parallelize(lotsOfData).map(new AvroKey(_) -> NullWritable.get).saveAsNewAPIHadoopDataset(job.getConfiguration)
+    } finally {
+      sc.stop()
     }
-
-    val job = new Job()
-    val schema = DataOne.SCHEMA$
-
-    FileOutputFormat.setOutputPath(job, new Path("/tmp/spark-bug"))
-    AvroJob.setOutputKeySchema(job, schema)
-    job.setOutputFormatClass(classOf[AvroKeyOutputFormat[DataOne]])
-
-    lotsOfData.map(new AvroKey(_) -> NullWritable.get).saveAsNewAPIHadoopDataset(job.getConfiguration)
 
   }
 
