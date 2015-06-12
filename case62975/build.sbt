@@ -1,5 +1,3 @@
-//import sun.security.tools.PathList
-
 name := "case62975"
 
 version := "1.0"
